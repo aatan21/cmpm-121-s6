@@ -24,14 +24,16 @@ const game = createGame();
 const heading = document.createElement("h1");
 heading.textContent = "Moth Lantern Garden";
 
-const intro = document.createElement("p");
-intro.textContent = "A dark garden waits. Make light, and see what arrives.";
-
-// The garden itself: the lantern is the way you make light, and steady
-// light draws moths out of the dark. A real button wrapping the image
-// keeps the action keyboard- and screen-reader-friendly.
+// The garden is the whole interface: the lantern is the way you make
+// light, the counters sit quietly in its corner, and the shop waits
+// below.
 const garden = document.createElement("div");
 garden.id = "garden";
+
+// Steady light spilling into the dark; it brightens as the garden
+// gathers more glow per second.
+const lanternGlow = document.createElement("div");
+lanternGlow.id = "lantern-glow";
 
 const strikeButton = document.createElement("button");
 strikeButton.type = "button";
@@ -42,31 +44,29 @@ strikeButton.setAttribute("aria-label", "Strike a match");
 const lantern = document.createElement("img");
 lantern.src = lanternUrl;
 lantern.alt = "";
-lantern.width = 96;
-lantern.height = 96;
+lantern.draggable = false;
+lantern.width = 120;
+lantern.height = 120;
 
 strikeButton.append(lantern);
 
 const moths = document.createElement("div");
 moths.id = "moths";
 
-garden.append(strikeButton, moths);
+const stats = document.createElement("div");
+stats.id = "stats";
+
+const glowCounter = document.createElement("div");
+glowCounter.id = "glow-counter";
+
+const statDetail = document.createElement("div");
+statDetail.id = "stat-detail";
+
+stats.append(glowCounter, statDetail);
 
 const gardenHint = document.createElement("p");
 gardenHint.id = "garden-hint";
 gardenHint.textContent = "Strike the lantern to make light.";
-
-const mothLine = document.createElement("p");
-mothLine.id = "moth-line";
-
-const glowCounter = document.createElement("p");
-glowCounter.id = "glow-counter";
-
-const rateLine = document.createElement("p");
-rateLine.id = "glow-rate";
-
-const strikePowerLine = document.createElement("p");
-strikePowerLine.id = "strike-power";
 
 const feedback = document.createElement("p");
 feedback.id = "strike-feedback";
@@ -80,47 +80,102 @@ const strikeMessages = [
 ];
 let strikesShown = 0;
 
-// D1 step 6: the shop offers three distinct ways to feed the light. Each
-// row shows its price, what it is like to live with, and how many of that
-// kind the garden already holds.
-const shopHeading = document.createElement("h2");
-shopHeading.textContent = "Spend glow on more light";
+// Flavor feedback fades in over the garden and drifts away again.
+let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
+
+function showFeedback(message: string): void {
+  feedback.textContent = message;
+  feedback.classList.add("show");
+  clearTimeout(feedbackTimer);
+  feedbackTimer = setTimeout(() => feedback.classList.remove("show"), 2600);
+}
+
+// The shop: three quiet rows, one per kind of light.
+const shop = document.createElement("div");
+shop.id = "shop";
+
+const candleItem = document.createElement("div");
+candleItem.className = "shop-item";
+
+const candleInfo = document.createElement("div");
+candleInfo.className = "shop-info";
+
+const candleName = document.createElement("p");
+candleName.className = "shop-name";
+candleName.textContent = "Tallow candle";
+
+const candleOwned = document.createElement("span");
+candleOwned.id = "candles-owned";
+candleOwned.className = "owned-badge";
+
+const candleDesc = document.createElement("p");
+candleDesc.className = "shop-desc";
+candleDesc.textContent = "Cheap, honest light.";
+
+candleName.append(candleOwned);
+candleInfo.append(candleName, candleDesc);
 
 const buyCandleButton = document.createElement("button");
 buyCandleButton.type = "button";
 buyCandleButton.id = "buy-candle";
 
-const candleDescription = document.createElement("p");
-candleDescription.className = "shop-description";
-candleDescription.textContent =
-  "Cheap, honest light. It burns wherever the dark is thickest.";
+candleItem.append(candleInfo, buyCandleButton);
 
-const candleOwnedLine = document.createElement("p");
-candleOwnedLine.id = "candles-owned";
+const strikerItem = document.createElement("div");
+strikerItem.className = "shop-item";
+
+const strikerInfo = document.createElement("div");
+strikerInfo.className = "shop-info";
+
+const strikerName = document.createElement("p");
+strikerName.className = "shop-name";
+strikerName.textContent = "Rosewood striker";
+
+const strikerOwned = document.createElement("span");
+strikerOwned.id = "strikers-owned";
+strikerOwned.className = "owned-badge";
+
+const strikerDesc = document.createElement("p");
+strikerDesc.className = "shop-desc";
+strikerDesc.textContent = "Fits the hand and strikes true.";
+
+strikerName.append(strikerOwned);
+strikerInfo.append(strikerName, strikerDesc);
 
 const buyStrikerButton = document.createElement("button");
 buyStrikerButton.type = "button";
 buyStrikerButton.id = "buy-striker";
 
-const strikerDescription = document.createElement("p");
-strikerDescription.className = "shop-description";
-strikerDescription.textContent =
-  "Fits the hand and strikes true, so every match burns brighter.";
+strikerItem.append(strikerInfo, buyStrikerButton);
 
-const strikerOwnedLine = document.createElement("p");
-strikerOwnedLine.id = "strikers-owned";
+const lanternItem = document.createElement("div");
+lanternItem.className = "shop-item";
+
+const lanternInfo = document.createElement("div");
+lanternInfo.className = "shop-info";
+
+const lanternName = document.createElement("p");
+lanternName.className = "shop-name";
+lanternName.textContent = "Oil lantern";
+
+const lanternOwned = document.createElement("span");
+lanternOwned.id = "lanterns-owned";
+lanternOwned.className = "owned-badge";
+
+const lanternDesc = document.createElement("p");
+lanternDesc.className = "shop-desc";
+lanternDesc.textContent = "Steady through the wind; moths gather round.";
+
+lanternName.append(lanternOwned);
+lanternInfo.append(lanternName, lanternDesc);
 
 const buyLanternButton = document.createElement("button");
 buyLanternButton.type = "button";
 buyLanternButton.id = "buy-lantern";
 
-const lanternDescription = document.createElement("p");
-lanternDescription.className = "shop-description";
-lanternDescription.textContent =
-  "Steady through the wind. Moths come from far around to circle it.";
+lanternItem.append(lanternInfo, buyLanternButton);
 
-const lanternOwnedLine = document.createElement("p");
-lanternOwnedLine.id = "lanterns-owned";
+shop.append(candleItem, strikerItem, lanternItem);
 
 // Moths are derived from steady light, never stored. The drifting glyphs
 // only need rebuilding when the count itself changes.
@@ -147,32 +202,30 @@ function renderMoths(): void {
 
 function render(): void {
   glowCounter.textContent = `Glow: ${Math.floor(game.glow)}`;
-  rateLine.textContent = `The garden gains ${
-    glowPerSecond(game)
-  } glow each second.`;
-  const mothTotal = mothCount(game);
-  mothLine.textContent = mothTotal === 1
-    ? "1 moth drifts through the garden, drawn to the light."
-    : `${mothTotal} moths drift through the garden, drawn to the light.`;
-  strikePowerLine.hidden = game.strikers === 0;
-  strikePowerLine.textContent = `Each strike now makes ${
-    1 + game.strikers
-  } glow.`;
-  buyCandleButton.textContent = `Buy a tallow candle (${
-    candleCost(game)
-  } glow)`;
+  const strikePower = 1 + game.strikers;
+  const parts = [
+    `${glowPerSecond(game)} glow each second`,
+    `${mothCount(game)} moths`,
+  ];
+  if (strikePower > 1) {
+    parts.push(`${strikePower} glow per strike`);
+  }
+  statDetail.textContent = parts.join(" · ");
+  candleOwned.textContent = `×${game.candles}`;
+  strikerOwned.textContent = `×${game.strikers}`;
+  lanternOwned.textContent = `×${game.lanterns}`;
+  buyCandleButton.textContent = `Buy · ${candleCost(game)} glow`;
   buyCandleButton.disabled = game.glow < candleCost(game);
-  candleOwnedLine.textContent = `Tallow candles owned: ${game.candles}`;
-  buyStrikerButton.textContent = `Buy a rosewood striker (${
-    strikerCost(game)
-  } glow)`;
+  buyStrikerButton.textContent = `Buy · ${strikerCost(game)} glow`;
   buyStrikerButton.disabled = game.glow < strikerCost(game);
-  strikerOwnedLine.textContent = `Rosewood strikers owned: ${game.strikers}`;
-  buyLanternButton.textContent = `Buy an oil lantern (${
-    lanternCost(game)
-  } glow)`;
+  buyLanternButton.textContent = `Buy · ${lanternCost(game)} glow`;
   buyLanternButton.disabled = game.glow < lanternCost(game);
-  lanternOwnedLine.textContent = `Oil lanterns owned: ${game.lanterns}`;
+  // The garden itself brightens as steady light gathers.
+  const bright = Math.min(glowPerSecond(game), 20);
+  lanternGlow.style.opacity = `${Math.min(0.3 + bright * 0.05, 1)}`;
+  lanternGlow.style.transform = `translate(-50%, -50%) scale(${
+    1 + bright * 0.05
+  })`;
   renderMoths();
 }
 render();
@@ -180,8 +233,11 @@ render();
 strikeButton.addEventListener("click", () => {
   strike(game);
   render();
-  feedback.textContent = strikeMessages[strikesShown % strikeMessages.length];
+  showFeedback(strikeMessages[strikesShown % strikeMessages.length]);
   strikesShown += 1;
+  if (strikesShown === 1) {
+    gardenHint.classList.add("hidden");
+  }
 });
 
 buyCandleButton.addEventListener("click", () => {
@@ -222,24 +278,5 @@ function frame(now: number): void {
 
 requestAnimationFrame(frame);
 
-app.append(
-  heading,
-  intro,
-  garden,
-  gardenHint,
-  mothLine,
-  glowCounter,
-  rateLine,
-  strikePowerLine,
-  feedback,
-  shopHeading,
-  buyCandleButton,
-  candleDescription,
-  candleOwnedLine,
-  buyStrikerButton,
-  strikerDescription,
-  strikerOwnedLine,
-  buyLanternButton,
-  lanternDescription,
-  lanternOwnedLine,
-);
+garden.append(lanternGlow, strikeButton, moths, stats, gardenHint, feedback);
+app.append(heading, garden, shop);
