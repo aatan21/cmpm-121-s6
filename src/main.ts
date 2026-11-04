@@ -1,7 +1,7 @@
 // Vite turns this import into a production-safe URL. Keep it as a file so
-// even this tiny example demonstrates a separately deployed asset.
+// the garden's lantern deploys as its own named asset.
 // @deno-types="./asset-url.d.ts"
-import tileUrl from "./assets/tile.svg?no-inline";
+import lanternUrl from "./assets/lantern.svg?no-inline";
 
 import {
   buyCandle,
@@ -11,6 +11,7 @@ import {
   createGame,
   glowPerSecond,
   lanternCost,
+  mothCount,
   strike,
   strikerCost,
   tick,
@@ -23,14 +24,28 @@ const game = createGame();
 const heading = document.createElement("h1");
 heading.textContent = "Moth Lantern Garden";
 
-const image = document.createElement("img");
-image.src = tileUrl;
-image.alt = "A teal tile with a cream circle";
-image.width = 96;
-image.height = 96;
-
 const intro = document.createElement("p");
 intro.textContent = "A dark garden waits. Make light, and see what arrives.";
+
+// The garden itself: a lantern to tend, and the moths your steady light
+// draws out of the dark.
+const garden = document.createElement("div");
+garden.id = "garden";
+
+const lantern = document.createElement("img");
+lantern.id = "lantern";
+lantern.src = lanternUrl;
+lantern.alt = "A lit oil lantern, its glass glowing amber";
+lantern.width = 96;
+lantern.height = 96;
+
+const moths = document.createElement("div");
+moths.id = "moths";
+
+garden.append(lantern, moths);
+
+const mothLine = document.createElement("p");
+mothLine.id = "moth-line";
 
 const glowCounter = document.createElement("p");
 glowCounter.id = "glow-counter";
@@ -54,17 +69,24 @@ const strikeMessages = [
   "A brief warmth against your fingers.",
   "The wick catches; a candle stands ready.",
   "Somewhere in the dark, wings stir.",
+  "A moth settles on the lantern's rim.",
 ];
 let strikesShown = 0;
 
 // D1 step 6: the shop offers three distinct ways to feed the light. Each
-// row shows its price and how many of that kind the garden already holds.
+// row shows its price, what it is like to live with, and how many of that
+// kind the garden already holds.
 const shopHeading = document.createElement("h2");
 shopHeading.textContent = "Spend glow on more light";
 
 const buyCandleButton = document.createElement("button");
 buyCandleButton.type = "button";
 buyCandleButton.id = "buy-candle";
+
+const candleDescription = document.createElement("p");
+candleDescription.className = "shop-description";
+candleDescription.textContent =
+  "Cheap, honest light. It burns wherever the dark is thickest.";
 
 const candleOwnedLine = document.createElement("p");
 candleOwnedLine.id = "candles-owned";
@@ -73,6 +95,11 @@ const buyStrikerButton = document.createElement("button");
 buyStrikerButton.type = "button";
 buyStrikerButton.id = "buy-striker";
 
+const strikerDescription = document.createElement("p");
+strikerDescription.className = "shop-description";
+strikerDescription.textContent =
+  "Fits the hand and strikes true, so every match burns brighter.";
+
 const strikerOwnedLine = document.createElement("p");
 strikerOwnedLine.id = "strikers-owned";
 
@@ -80,14 +107,46 @@ const buyLanternButton = document.createElement("button");
 buyLanternButton.type = "button";
 buyLanternButton.id = "buy-lantern";
 
+const lanternDescription = document.createElement("p");
+lanternDescription.className = "shop-description";
+lanternDescription.textContent =
+  "Steady through the wind. Moths come from far around to circle it.";
+
 const lanternOwnedLine = document.createElement("p");
 lanternOwnedLine.id = "lanterns-owned";
+
+// Moths are derived from steady light, never stored. The drifting glyphs
+// only need rebuilding when the count itself changes.
+const MAX_VISIBLE_MOTHS = 24;
+let shownMoths = -1;
+
+function renderMoths(): void {
+  const wanted = Math.min(mothCount(game), MAX_VISIBLE_MOTHS);
+  if (wanted === shownMoths) {
+    return;
+  }
+  shownMoths = wanted;
+  moths.replaceChildren();
+  for (let i = 0; i < wanted; i++) {
+    const moth = document.createElement("span");
+    moth.className = "moth";
+    moth.style.left = `${5 + Math.random() * 90}%`;
+    moth.style.top = `${15 + Math.random() * 70}%`;
+    moth.style.animationDuration = `${3 + Math.random() * 4}s`;
+    moth.style.animationDelay = `${-Math.random() * 4}s`;
+    moths.append(moth);
+  }
+}
 
 function render(): void {
   glowCounter.textContent = `Glow: ${Math.floor(game.glow)}`;
   rateLine.textContent = `The garden gains ${
     glowPerSecond(game)
   } glow each second.`;
+  const mothTotal = mothCount(game);
+  mothLine.textContent = mothTotal === 1
+    ? "1 moth drifts through the garden, drawn to the light."
+    : `${mothTotal} moths drift through the garden, drawn to the light.`;
   strikePowerLine.hidden = game.strikers === 0;
   strikePowerLine.textContent = `Each strike now makes ${
     1 + game.strikers
@@ -107,6 +166,7 @@ function render(): void {
   } glow)`;
   buyLanternButton.disabled = game.glow < lanternCost(game);
   lanternOwnedLine.textContent = `Oil lanterns owned: ${game.lanterns}`;
+  renderMoths();
 }
 render();
 
@@ -157,8 +217,9 @@ requestAnimationFrame(frame);
 
 app.append(
   heading,
-  image,
   intro,
+  garden,
+  mothLine,
   glowCounter,
   rateLine,
   strikePowerLine,
@@ -166,9 +227,12 @@ app.append(
   feedback,
   shopHeading,
   buyCandleButton,
+  candleDescription,
   candleOwnedLine,
   buyStrikerButton,
+  strikerDescription,
   strikerOwnedLine,
   buyLanternButton,
+  lanternDescription,
   lanternOwnedLine,
 );

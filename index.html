@@ -4,6 +4,143 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Moth Lantern Garden</title>
+    <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% -10%, #241d31 0%, #14101f 45%, #0b0813 100%);
+      color: #efe6d4;
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.5;
+    }
+
+    #app {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    h1 {
+      margin: 8px 0 4px;
+      color: #f3c96b;
+      font-weight: normal;
+      letter-spacing: 0.5px;
+    }
+
+    h2 {
+      margin: 28px 0 8px;
+      color: #d8c9a8;
+      font-size: 1.05rem;
+      font-weight: normal;
+    }
+
+    p {
+      margin: 6px 0;
+    }
+
+    #garden {
+      position: relative;
+      height: 150px;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #322941;
+      border-radius: 12px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 42%, #2c2436 0%, #191423 55%, #120e1a 100%);
+    }
+
+    #moths {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .moth {
+      position: absolute;
+      width: 7px;
+      height: 5px;
+      border-radius: 50%;
+      background: #f5e6c8;
+      box-shadow: 0 0 6px 1px rgba(245, 230, 200, 0.6);
+      animation: drift linear infinite;
+    }
+
+    @keyframes drift {
+      0% {
+        transform: translate(0, 0);
+      }
+
+      25% {
+        transform: translate(9px, -7px);
+      }
+
+      50% {
+        transform: translate(-7px, -11px);
+      }
+
+      75% {
+        transform: translate(-11px, -4px);
+      }
+
+      100% {
+        transform: translate(0, 0);
+      }
+    }
+
+    button {
+      font: inherit;
+      color: #241a0e;
+      background: linear-gradient(#f6cf7d, #e0a13e);
+      border: 1px solid #8a5a1d;
+      border-radius: 8px;
+      padding: 6px 14px;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(1.08);
+    }
+
+    button:disabled {
+      color: #8d8271;
+      background: #4a4034;
+      border-color: #3a3126;
+      cursor: default;
+    }
+
+    #strike-feedback {
+      min-height: 1.5em;
+      color: #b9ab90;
+      font-style: italic;
+    }
+
+    .shop-description {
+      color: #b3a68f;
+    }
+
+    #glow-rate,
+    #strike-power,
+    #moth-line,
+    #candles-owned,
+    #strikers-owned,
+    #lanterns-owned {
+      color: #b3a68f;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .moth {
+        animation: none;
+      }
+    }
+    </style>
   </head>
   <body>
     <main id="app"></main>

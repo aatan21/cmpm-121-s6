@@ -30,6 +30,12 @@ export function glowPerSecond(state: GameState): number {
   return state.candles + state.lanterns * 6;
 }
 
+// Steady light draws moths: the garden holds two for every glow per second
+// it gathers.
+export function mothCount(state: GameState): number {
+  return glowPerSecond(state) * 2;
+}
+
 // Time passes: every burning light adds its glow for the elapsed seconds.
 export function tick(state: GameState, elapsedSeconds: number): void {
   gainGlow(state, glowPerSecond(state) * elapsedSeconds);
