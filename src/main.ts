@@ -3,7 +3,7 @@
 // @deno-types="./asset-url.d.ts"
 import tileUrl from "./assets/tile.svg?no-inline";
 
-import { createGame, strike, tick } from "./state.ts";
+import { buyCandle, CANDLE_COST, createGame, strike, tick } from "./state.ts";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 
@@ -21,29 +21,11 @@ image.height = 96;
 const intro = document.createElement("p");
 intro.textContent = "A dark garden waits. Make light, and see what arrives.";
 
-// D1 step 2: glow is stored state, and the display always reads from that
-// state, never from a parallel count.
 const glowCounter = document.createElement("p");
 glowCounter.id = "glow-counter";
 
-function renderGlow(): void {
-  // Glow accumulates fractionally between whole numbers; the display shows
-  // whole glow.
-  glowCounter.textContent = `Glow: ${Math.floor(game.glow)}`;
-}
-renderGlow();
-
-// D1 step 3: candles burn on their own. The rate line names the source so
-// the growth stays explainable.
 const rateLine = document.createElement("p");
 rateLine.id = "glow-rate";
-
-function renderRate(): void {
-  const noun = game.candles === 1 ? "candle" : "candles";
-  rateLine.textContent =
-    `${game.candles} ${noun} burning, ${game.candles} glow each second.`;
-}
-renderRate();
 
 const strikeButton = document.createElement("button");
 strikeButton.type = "button";
@@ -61,11 +43,34 @@ const strikeMessages = [
 ];
 let strikesShown = 0;
 
+// D1 step 5: the first consequential purchase. The button always shows the
+// current price and only enables when the garden can afford it, so prices
+// and affordability move together.
+const buyCandleButton = document.createElement("button");
+buyCandleButton.type = "button";
+buyCandleButton.id = "buy-candle";
+
+function render(): void {
+  glowCounter.textContent = `Glow: ${Math.floor(game.glow)}`;
+  const noun = game.candles === 1 ? "candle" : "candles";
+  rateLine.textContent =
+    `${game.candles} ${noun} burning, ${game.candles} glow each second.`;
+  buyCandleButton.textContent = `Buy a tallow candle (${CANDLE_COST} glow)`;
+  buyCandleButton.disabled = game.glow < CANDLE_COST;
+}
+render();
+
 strikeButton.addEventListener("click", () => {
   strike(game);
-  renderGlow();
+  render();
   feedback.textContent = strikeMessages[strikesShown % strikeMessages.length];
   strikesShown += 1;
+});
+
+buyCandleButton.addEventListener("click", () => {
+  if (buyCandle(game)) {
+    render();
+  }
 });
 
 // D1 step 4: one animation loop drives all time. Each frame converts the
@@ -80,7 +85,7 @@ function frame(now: number): void {
   if (lastFrame !== null) {
     const elapsedSeconds = Math.min((now - lastFrame) / 1000, 1);
     tick(game, elapsedSeconds);
-    renderGlow();
+    render();
   }
   lastFrame = now;
   requestAnimationFrame(frame);
@@ -96,4 +101,5 @@ app.append(
   rateLine,
   strikeButton,
   feedback,
+  buyCandleButton,
 );
