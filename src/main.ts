@@ -3,7 +3,7 @@
 // @deno-types="./asset-url.d.ts"
 import tileUrl from "./assets/tile.svg?no-inline";
 
-import { createGame, strike } from "./state.ts";
+import { createGame, strike, tickSecond } from "./state.ts";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 
@@ -31,6 +31,18 @@ function renderGlow(): void {
 }
 renderGlow();
 
+// D1 step 3: candles burn on their own. The rate line names the source so
+// the growth stays explainable.
+const rateLine = document.createElement("p");
+rateLine.id = "glow-rate";
+
+function renderRate(): void {
+  const noun = game.candles === 1 ? "candle" : "candles";
+  rateLine.textContent =
+    `${game.candles} ${noun} burning, ${game.candles} glow each second.`;
+}
+renderRate();
+
 const strikeButton = document.createElement("button");
 strikeButton.type = "button";
 strikeButton.id = "strike-match";
@@ -54,4 +66,19 @@ strikeButton.addEventListener("click", () => {
   strikesShown += 1;
 });
 
-app.append(heading, image, intro, glowCounter, strikeButton, feedback);
+// A repeating timer adds candle light each second while clicking still
+// works.
+setInterval(() => {
+  tickSecond(game);
+  renderGlow();
+}, 1000);
+
+app.append(
+  heading,
+  image,
+  intro,
+  glowCounter,
+  rateLine,
+  strikeButton,
+  feedback,
+);
