@@ -116,6 +116,30 @@
       cursor: default;
     }
 
+    /* The lantern is itself the strike button: no chrome, just press
+       feedback and a visible keyboard focus ring. */
+    .lantern-strike {
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.05s ease;
+    }
+
+    .lantern-strike img {
+      display: block;
+    }
+
+    .lantern-strike:active {
+      transform: scale(0.96);
+    }
+
+    .lantern-strike:focus-visible {
+      outline: 2px solid #f3c96b;
+      outline-offset: 4px;
+    }
+
     #strike-feedback {
       min-height: 1.5em;
       color: #b9ab90;
@@ -128,11 +152,16 @@
 
     #glow-rate,
     #strike-power,
+    #garden-hint,
     #moth-line,
     #candles-owned,
     #strikers-owned,
     #lanterns-owned {
       color: #b3a68f;
+    }
+
+    #garden-hint {
+      text-align: center;
     }
 
     @media (prefers-reduced-motion: reduce) {

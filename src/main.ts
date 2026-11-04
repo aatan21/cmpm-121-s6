@@ -27,22 +27,34 @@ heading.textContent = "Moth Lantern Garden";
 const intro = document.createElement("p");
 intro.textContent = "A dark garden waits. Make light, and see what arrives.";
 
-// The garden itself: a lantern to tend, and the moths your steady light
-// draws out of the dark.
+// The garden itself: the lantern is the way you make light, and steady
+// light draws moths out of the dark. A real button wrapping the image
+// keeps the action keyboard- and screen-reader-friendly.
 const garden = document.createElement("div");
 garden.id = "garden";
 
+const strikeButton = document.createElement("button");
+strikeButton.type = "button";
+strikeButton.id = "strike-match";
+strikeButton.className = "lantern-strike";
+strikeButton.setAttribute("aria-label", "Strike a match");
+
 const lantern = document.createElement("img");
-lantern.id = "lantern";
 lantern.src = lanternUrl;
-lantern.alt = "A lit oil lantern, its glass glowing amber";
+lantern.alt = "";
 lantern.width = 96;
 lantern.height = 96;
+
+strikeButton.append(lantern);
 
 const moths = document.createElement("div");
 moths.id = "moths";
 
-garden.append(lantern, moths);
+garden.append(strikeButton, moths);
+
+const gardenHint = document.createElement("p");
+gardenHint.id = "garden-hint";
+gardenHint.textContent = "Strike the lantern to make light.";
 
 const mothLine = document.createElement("p");
 mothLine.id = "moth-line";
@@ -55,11 +67,6 @@ rateLine.id = "glow-rate";
 
 const strikePowerLine = document.createElement("p");
 strikePowerLine.id = "strike-power";
-
-const strikeButton = document.createElement("button");
-strikeButton.type = "button";
-strikeButton.id = "strike-match";
-strikeButton.textContent = "Strike a match";
 
 const feedback = document.createElement("p");
 feedback.id = "strike-feedback";
@@ -219,11 +226,11 @@ app.append(
   heading,
   intro,
   garden,
+  gardenHint,
   mothLine,
   glowCounter,
   rateLine,
   strikePowerLine,
-  strikeButton,
   feedback,
   shopHeading,
   buyCandleButton,
