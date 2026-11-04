@@ -19,7 +19,7 @@ export function strike(state: GameState): void {
   gainGlow(state, 1);
 }
 
-// One second passes; every burning candle adds its light.
-export function tickSecond(state: GameState): void {
-  gainGlow(state, state.candles);
+// Time passes: every burning candle adds its light for the elapsed seconds.
+export function tick(state: GameState, elapsedSeconds: number): void {
+  gainGlow(state, state.candles * elapsedSeconds);
 }

@@ -3,7 +3,7 @@
 // @deno-types="./asset-url.d.ts"
 import tileUrl from "./assets/tile.svg?no-inline";
 
-import { createGame, strike, tickSecond } from "./state.ts";
+import { createGame, strike, tick } from "./state.ts";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 
@@ -27,7 +27,9 @@ const glowCounter = document.createElement("p");
 glowCounter.id = "glow-counter";
 
 function renderGlow(): void {
-  glowCounter.textContent = `Glow: ${game.glow}`;
+  // Glow accumulates fractionally between whole numbers; the display shows
+  // whole glow.
+  glowCounter.textContent = `Glow: ${Math.floor(game.glow)}`;
 }
 renderGlow();
 
@@ -66,12 +68,25 @@ strikeButton.addEventListener("click", () => {
   strikesShown += 1;
 });
 
-// A repeating timer adds candle light each second while clicking still
-// works.
-setInterval(() => {
-  tickSecond(game);
-  renderGlow();
-}, 1000);
+// D1 step 4: one animation loop drives all time. Each frame converts the
+// elapsed milliseconds into seconds, so growth depends on real elapsed
+// time rather than the number of frames, and because this loop is the only
+// thing that changes glow over time, nothing is counted twice. Hidden tabs
+// pause animation frames, so a gap longer than a second counts as one
+// second instead of dumping stored-up growth.
+let lastFrame: number | null = null;
+
+function frame(now: number): void {
+  if (lastFrame !== null) {
+    const elapsedSeconds = Math.min((now - lastFrame) / 1000, 1);
+    tick(game, elapsedSeconds);
+    renderGlow();
+  }
+  lastFrame = now;
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
 
 app.append(
   heading,
