@@ -7,12 +7,12 @@ import {
   buyCandle,
   buyLantern,
   buyStriker,
-  CANDLE_COST,
+  candleCost,
   createGame,
   glowPerSecond,
-  LANTERN_COST,
+  lanternCost,
   strike,
-  STRIKER_COST,
+  strikerCost,
   tick,
 } from "./state.ts";
 
@@ -92,15 +92,20 @@ function render(): void {
   strikePowerLine.textContent = `Each strike now makes ${
     1 + game.strikers
   } glow.`;
-  buyCandleButton.textContent = `Buy a tallow candle (${CANDLE_COST} glow)`;
-  buyCandleButton.disabled = game.glow < CANDLE_COST;
+  buyCandleButton.textContent = `Buy a tallow candle (${
+    candleCost(game)
+  } glow)`;
+  buyCandleButton.disabled = game.glow < candleCost(game);
   candleOwnedLine.textContent = `Tallow candles owned: ${game.candles}`;
-  buyStrikerButton.textContent =
-    `Buy a rosewood striker (${STRIKER_COST} glow)`;
-  buyStrikerButton.disabled = game.glow < STRIKER_COST;
+  buyStrikerButton.textContent = `Buy a rosewood striker (${
+    strikerCost(game)
+  } glow)`;
+  buyStrikerButton.disabled = game.glow < strikerCost(game);
   strikerOwnedLine.textContent = `Rosewood strikers owned: ${game.strikers}`;
-  buyLanternButton.textContent = `Buy an oil lantern (${LANTERN_COST} glow)`;
-  buyLanternButton.disabled = game.glow < LANTERN_COST;
+  buyLanternButton.textContent = `Buy an oil lantern (${
+    lanternCost(game)
+  } glow)`;
+  buyLanternButton.disabled = game.glow < lanternCost(game);
   lanternOwnedLine.textContent = `Oil lanterns owned: ${game.lanterns}`;
 }
 render();

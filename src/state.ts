@@ -35,31 +35,48 @@ export function tick(state: GameState, elapsedSeconds: number): void {
   gainGlow(state, glowPerSecond(state) * elapsedSeconds);
 }
 
+// Prices rise as the garden fills with light: each further purchase of a
+// kind costs 15% more per item you already own, rounded up.
+export function candleCost(state: GameState): number {
+  return Math.ceil(CANDLE_COST * Math.pow(1.15, state.candles));
+}
+
+export function lanternCost(state: GameState): number {
+  return Math.ceil(LANTERN_COST * Math.pow(1.15, state.lanterns));
+}
+
+export function strikerCost(state: GameState): number {
+  return Math.ceil(STRIKER_COST * Math.pow(1.15, state.strikers));
+}
+
 // Buying something spends glow and makes the garden brighter in its own
 // way. An unaffordable purchase is refused and changes nothing.
 export function buyCandle(state: GameState): boolean {
-  if (state.glow < CANDLE_COST) {
+  const cost = candleCost(state);
+  if (state.glow < cost) {
     return false;
   }
-  state.glow -= CANDLE_COST;
+  state.glow -= cost;
   state.candles += 1;
   return true;
 }
 
 export function buyStriker(state: GameState): boolean {
-  if (state.glow < STRIKER_COST) {
+  const cost = strikerCost(state);
+  if (state.glow < cost) {
     return false;
   }
-  state.glow -= STRIKER_COST;
+  state.glow -= cost;
   state.strikers += 1;
   return true;
 }
 
 export function buyLantern(state: GameState): boolean {
-  if (state.glow < LANTERN_COST) {
+  const cost = lanternCost(state);
+  if (state.glow < cost) {
     return false;
   }
-  state.glow -= LANTERN_COST;
+  state.glow -= cost;
   state.lanterns += 1;
   return true;
 }
